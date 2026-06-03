@@ -8,10 +8,10 @@ from app.models import Base
 from app.api import auth, users, checkpoints, visits, reports
 from app.config import settings
 
-Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI(title=settings.APP_NAME, version="1.0.0")
-
+Base.metadata.create_all(bind=engine)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
