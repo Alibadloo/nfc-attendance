@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nfc_user
+      POSTGRES_PASSWORD: nfc_pass
+      POSTGRES_DB: nfc_attendance
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nfc_user -d nfc_attendance"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://nfc_user:nfc_pass@db:5432/nfc_attendance
+      SECRET_KEY: "change-this-in-production-use-long-random-string"
+    volumes:
+      - uploads_data:/app/uploads
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  uploads_data:
